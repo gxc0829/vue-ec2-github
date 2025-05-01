@@ -1,0 +1,39 @@
+name: Build & Deploy Vue App to EC2 via CodeDeploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Vue project
+        run: npm run build
+
+      - name: Package files for deployment
+        run: zip -r vue-app.zip dist appspec.yml scripts
+
+      - name: Deploy via CodeDeploy
+        uses: webfactory/create-aws-codedeploy-deployment@v1
+        with:
+          application-name: ${{ secrets.CODEDEPLOY_APP_NAME }}
+          deployment-group: ${{ secrets.CODEDEPLOY_DEPLOY_GROUP }}
+          deployment-zip: vue-app.zip
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          region: ${{ secrets.AWS_REGION }}
+

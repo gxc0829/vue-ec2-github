@@ -1,0 +1,12 @@
+version: 0.0
+os: linux
+files:
+  - source: /dist/
+    destination: /var/www/html/
+
+hooks:
+  AfterInstall:
+    - location: scripts/restart_httpd.sh
+      timeout: 60
+      runas: root
+
