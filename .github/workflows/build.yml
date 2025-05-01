@@ -24,7 +24,7 @@ jobs:
       run: npm run build
 
     - name: Archive production build
-      uses: actions/upload-artifact@v3.1.2
+      uses: actions/upload-artifact@v3
       with:
         name: vue-dist
         path: dist/
