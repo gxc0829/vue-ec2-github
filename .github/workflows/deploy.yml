@@ -36,7 +36,7 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
       - name: Deploy via CodeDeploy
-        uses: awsactions/aws-codedeploy-deploy@v1
+        uses: aws-actions/aws-codedeploy-deploy@v1
         with:
           application-name: ${{ secrets.CODEDEPLOY_APP_NAME }}
           deployment-group: ${{ secrets.CODEDEPLOY_DEPLOY_GROUP }}
