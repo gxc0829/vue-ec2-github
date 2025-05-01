@@ -1,9 +1,8 @@
-name: Build & Deploy Vue App to EC2 via CodeDeploy
+name: Build & Deploy Vue App via CodeDeploy
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   build-and-deploy:
@@ -13,7 +12,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -24,10 +23,10 @@ jobs:
       - name: Build Vue project
         run: npm run build
 
-      - name: Package files for deployment
+      - name: Package deploy bundle
         run: zip -r vue-app.zip dist appspec.yml scripts
 
-      - name: Upload to S3
+      - name: Upload artifact to S3
         run: |
           aws s3 cp vue-app.zip s3://${{ secrets.S3_BUCKET }}/vue-app.zip
         env:
@@ -35,16 +34,17 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
-      - name: Deploy via CodeDeploy
-        uses: aws-actions/aws-codedeploy-deploy@v1
-        with:
-          application-name: ${{ secrets.CODEDEPLOY_APP_NAME }}
-          deployment-group: ${{ secrets.CODEDEPLOY_DEPLOY_GROUP }}
-          deployment-config-name: CodeDeployDefault.AllAtOnce
-          deployment-creator: user
-          region: ${{ secrets.AWS_REGION }}
-          bucket: ${{ secrets.S3_BUCKET }}
-          bundle-key: vue-app.zip
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Trigger deployment via AWS CLI
+        run: |
+          aws deploy create-deployment \
+            --application-name ${{ secrets.CODEDEPLOY_APP_NAME }} \
+            --deployment-group-name ${{ secrets.CODEDEPLOY_DEPLOY_GROUP }} \
+            --s3-location bucket=${{ secrets.S3_BUCKET }},bundleType=zip,key=vue-app.zip \
+            --deployment-config-name CodeDeployDefault.AllAtOnce \
+            --region ${{ secrets.AWS_REGION }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+
 
