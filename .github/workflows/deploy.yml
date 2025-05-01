@@ -27,13 +27,24 @@ jobs:
       - name: Package files for deployment
         run: zip -r vue-app.zip dist appspec.yml scripts
 
+      - name: Upload to S3
+        run: |
+          aws s3 cp vue-app.zip s3://${{ secrets.S3_BUCKET }}/vue-app.zip
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+
       - name: Deploy via CodeDeploy
-        uses: webfactory/create-aws-codedeploy-deployment@v1
+        uses: awsactions/aws-codedeploy-deploy@v1
         with:
           application-name: ${{ secrets.CODEDEPLOY_APP_NAME }}
           deployment-group: ${{ secrets.CODEDEPLOY_DEPLOY_GROUP }}
-          deployment-zip: vue-app.zip
+          deployment-config-name: CodeDeployDefault.AllAtOnce
+          deployment-creator: user
+          region: ${{ secrets.AWS_REGION }}
+          bucket: ${{ secrets.S3_BUCKET }}
+          bundle-key: vue-app.zip
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          region: ${{ secrets.AWS_REGION }}
 
