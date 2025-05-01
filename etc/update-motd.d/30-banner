@@ -1,0 +1,65 @@
+#!/bin/sh
+
+METADATA_BASEURL="http://169.254.169.254"
+METADATA_TOKEN_PATH="latest/api/token"
+
+# IMDS client code lifted from `ec2-metadata` from the ec2-utils package
+
+function set_imds_token()
+{
+        if [ -z "${IMDS_TOKEN}" ];then
+                IMDS_TOKEN=$(curl -s -f -X PUT -H "X-aws-ec2-metadata-token-ttl-seconds: 30" ${METADATA_BASEURL}/${METADATA_TOKEN_PATH})
+                if [ "${?}" -gt 0 ] || [ -z "${IMDS_TOKEN}" ]; then
+                        echo '[ERROR] Could not get IMDSv2 token. Instance Metadata might have been disabled or this is not an EC2 instance.'
+                        exit 1
+                fi
+        fi
+}
+
+# param1 = query
+function get_meta()
+{
+        local imds_out=$(curl -s -q -H "X-aws-ec2-metadata-token:${IMDS_TOKEN}" -f ${METADATA_BASEURL}/latest/${1})
+        echo -n "${imds_out}"
+}
+
+set_imds_token
+
+[ -n "$partition" ] || partition=$(get_meta meta-data/services/partition)
+
+test -e /etc/os-release && os_release='/etc/os-release' || os_release='/usr/lib/os-release'
+. "${os_release}"
+
+case "$partition" in
+    aws|aws-cn)
+        cat << EOF
+   ,     #_
+   ~\_  ####_        ${PRETTY_NAME:-Amazon Linux 2}
+  ~~  \_#####\\
+  ~~     \###|       AL2 End of Life is ${SUPPORT_END:-2026-06-30}.
+  ~~       \#/ ___
+   ~~       V~' '->
+    ~~~         /    A newer version of Amazon Linux is available!
+      ~~._.   _/
+         _/ _/       Amazon Linux 2023, GA and supported until 2028-03-15.
+       _/m/'           https://aws.amazon.com/linux/amazon-linux-2023/
+
+EOF
+        ;;
+    *)
+        cat << EOF
+   ,     #_
+   ~\_  ####_        ${PRETTY_NAME:-Amazon Linux 2}
+  ~~  \_#####\\
+  ~~     \###|       AL2 End of Life is ${SUPPORT_END:-2026-06-30}.
+  ~~       \#/ ___
+   ~~       V~' '->
+    ~~~         /
+      ~~._.   _/
+         _/ _/
+       _/m/'
+
+EOF
+        ;;
+esac
+

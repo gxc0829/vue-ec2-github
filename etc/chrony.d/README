@@ -1,0 +1,26 @@
+This directory splits up the configuration of chrony into multiple fragments so
+that NTP servers can be more easily dynamically configured at an instance's
+launch time without losing customizations at a global level.
+
+Files found under the /etc/chrony.d directory with the ".conf" extension are
+parsed in the lexicographical order of the file names when chronyd starts up.
+
+Files in this directory that end with the ".sources" extension can only contain
+the "peer", "pool" and "server" directives and must have all lines terminated by
+a trailing newline. There is no need to restart chronyd for these time sources
+to be usable, running 'chronyc reload sources' is sufficient.
+
+Example:
+# echo 'server 192.0.2.1 iburst' > /etc/chrony.d/local-ntp-server.sources
+# chronyc reload sources
+
+Note: for any settings in this directory to take effect, /etc/chrony.conf
+must have the following two directive enabled:
+
+confdir /etc/chrony.d
+sourcedir /etc/chrony.d
+
+If they are not present, then previous modifications to this file may have
+prevented the RPM Package Manager from updating and overwriting chrony's
+configuration with new defaults. You can either replace chrony.conf with
+/etc/chrony.conf.rpmnew or manually merge desired changes by hand.

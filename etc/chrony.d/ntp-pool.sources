@@ -1,0 +1,11 @@
+# Use public servers from the pool.ntp.org project.
+# Please consider joining the pool (https://www.pool.ntp.org/join.html).
+
+# This will use (up to):
+# - 1 source from [0-1].amazon.pool.ntp.org each (IPv4 only atm)
+# - 2 sources from 2.amazon.pool.ntp.org which is IPv6 enabled as well
+# This means by default, up to 2 dual-stack and up to 2 additional IPv4-only
+# sources will be used.
+pool 0.amazon.pool.ntp.org iburst maxsources 1
+pool 1.amazon.pool.ntp.org iburst maxsources 1
+pool 2.amazon.pool.ntp.org iburst maxsources 2

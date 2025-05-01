@@ -1,0 +1,11 @@
+# Note: we do not recommend using both the IPv4 and the IPv6 link-local address
+# entries at the same time here. The IPv4 and IPv6 NTP packets come from the same
+# local server for your instance. You will likely get mixed results with some
+# packets coming from the IPv4 endpoint and some from the IPv6 endpoint if you are
+# using both at the same time.
+
+# use the Amazon Time Sync Service (IPv4)
+server 169.254.169.123 prefer iburst minpoll 4 maxpoll 4
+
+# use the Amazon Time Sync Service (IPv6)
+# server fd00:ec2::123 prefer iburst minpoll 4 maxpoll 4

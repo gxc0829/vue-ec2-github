@@ -1,0 +1,2 @@
+#!/bin/bash
+timeout 5s amazon-linux-extras system_motd 2>/dev/null

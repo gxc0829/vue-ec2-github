@@ -1,0 +1,9 @@
+# dist macros.
+
+%amzn 2
+%centos_ver 7
+%centos 7
+%rhel 7
+%amzn2 1
+%el7 1
+%dist .amzn2
